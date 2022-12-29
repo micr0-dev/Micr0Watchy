@@ -25,10 +25,10 @@ username = os.getenv('SP_USERNAME')
 
 keyPass = os.getenv('KEY_PASSWD')
 
-# <ALL USER INFO IS IN THE .env FILE>
-
 # Redirect uri for spotify authentication
-redirect_uri = "http://localhost:18723/"
+redirect_uri = "http://"+os.getenv('HOST_IP')+":18723/"
+
+# <ALL USER INFO IS IN THE .env FILE>
 
 # Get path of project directory
 path = os.path.dirname(__file__)+"/"

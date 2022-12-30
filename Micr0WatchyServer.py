@@ -74,7 +74,10 @@ except TypeError:
     print("Please go to the following URL and grant access to your Spotify account:")
     print(auth_url)
     # Wait for the user to grant access
-    input("Press Enter after granting access:")
+    try:
+        input("Press Enter after granting access:")
+    except EOFError:
+        pass
 
 # Get the access token and refresh token
 access_token = oauth.get_access_token(as_dict=False)
@@ -137,6 +140,10 @@ def spotifyloop():
         except requests.exceptions.ConnectionError:
             print("ConnectionError")
             infoDict["spresponsecode"] = 503
+        except Exception as e:
+            infoDict["spresponsecode"] = 500
+            print(e)
+
 
         # if (tmpname != infoDict["name"] or tmpartists != infoDict["artists"]):
         #     print("Name: " + infoDict["name"])
@@ -157,9 +164,9 @@ def weatherloop():
             infoDict["status"] = w.detailed_status.title()
             infoDict["wtresponsecode"] = 200
             print(" Success!")
-        except:
+        except Exception as e:
             infoDict["wtresponsecode"] = 500
-            print(" Internal Server Error")
+            print(e)
 
         # # Print the temperature and status
         # print("Temperature: "+str(infoDict["temperature"])+"°C")

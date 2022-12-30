@@ -1,6 +1,9 @@
-import requests
+import requests, dotenv, os
 
-url = 'https://localhost:18724/'
+dotenv.load_dotenv()
+
+url = "https://"+os.getenv('HOST_IP')+":18724/"
+
 
 response = requests.get(url, verify=False)
 

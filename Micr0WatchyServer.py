@@ -209,6 +209,38 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         # Write the JSON string to the response body
         self.wfile.write(bytes(json_data, 'utf-8'))
 
+    def do_POST(self):
+        self.send_response(200)
+
+        self.send_header('Content-type', 'application/json')
+        
+        # Set the Content-Security-Policy header to allow loading resources over HTTPS
+        self.send_header('Content-Security-Policy', "default-src https:")
+        
+        # End the headers
+        self.end_headers()
+
+        # Read the request body
+        content_length = int(self.headers['Content-Length'])
+        body = self.rfile.read(content_length)
+
+        # Convert the request body to a JSON object
+        data = json.loads(body)
+
+        # Check the value of the "command" field
+        if data["command"] == "next":
+            sp.next_track()
+        elif data["command"] == "prev":
+            sp.previous_track()
+        elif data["command"] == "pause":
+            if infoDict["isPlaying"]:
+                sp.start_playback()
+            else:
+                sp.pause_playback()
+        else:
+            return
+        
+
 def getServer():
     PORT = 18724
 

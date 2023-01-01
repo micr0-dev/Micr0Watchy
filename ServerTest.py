@@ -22,6 +22,7 @@ headers = {
 
 # Set up the JSON payload
 payload = {
+    "key": os.getenv('HANDLER_KEY'),
     "command": "next"
 }
 

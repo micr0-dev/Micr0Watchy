@@ -227,6 +227,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         # Convert the request body to a JSON object
         data = json.loads(body)
 
+        if data["key"] != os.getenv('HANDLER_KEY'):
+            return
+
         # Check the value of the "command" field
         if data["command"] == "next":
             sp.next_track()
@@ -234,9 +237,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             sp.previous_track()
         elif data["command"] == "pause":
             if infoDict["isPlaying"]:
-                sp.start_playback()
-            else:
                 sp.pause_playback()
+            else:
+                sp.start_playback()
         else:
             return
         

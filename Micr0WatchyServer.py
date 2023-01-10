@@ -90,12 +90,19 @@ def tokenloop():
     time.sleep(1)
     while True:
         print("Refreshing Token...", end="")
-        token_info = oauth.get_cached_token()
-        reftime = token_info["expires_at"]-int(time.time())-200
-        refresh_token = token_info["refresh_token"]
-        oauth.refresh_access_token(refresh_token)
-        access_token = oauth.get_cached_token()["access_token"]
-        sp = spotipy.Spotify(auth=access_token)
+        try:
+            token_info = oauth.get_cached_token()
+            reftime = token_info["expires_at"]-int(time.time())-200
+            refresh_token = token_info["refresh_token"]
+            oauth.refresh_access_token(refresh_token)
+            access_token = oauth.get_cached_token()["access_token"]
+            sp = spotipy.Spotify(auth=access_token)
+        except spotipy.client.SpotifyException:
+            print("SpotifyException, Most likely expired token")
+        except requests.exceptions.ConnectionError:
+            print("ConnectionError")
+        except Exception as e:
+            print(e)
         print(" Success! Next refresh in "+str(reftime)+" seconds.")
         time.sleep(reftime)
 
@@ -210,6 +217,21 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(bytes(json_data, 'utf-8'))
 
     def do_POST(self):
+        # Read the request body
+        content_length = int(self.headers['Content-Length'])
+        body = self.rfile.read(content_length)
+
+        # Convert the request body to a JSON object
+        data = json.loads(body)
+
+        if data["key"] != os.getenv('HANDLER_KEY'):
+            self.send_response(403)  # Forbidden
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-Security-Policy', "default-src https:")
+            self.end_headers()
+            self.wfile.write(bytes('{"error": "Access denied"}', 'utf-8'))
+            return
+
         self.send_response(200)
 
         self.send_header('Content-type', 'application/json')
@@ -219,16 +241,6 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         
         # End the headers
         self.end_headers()
-
-        # Read the request body
-        content_length = int(self.headers['Content-Length'])
-        body = self.rfile.read(content_length)
-
-        # Convert the request body to a JSON object
-        data = json.loads(body)
-
-        if data["key"] != os.getenv('HANDLER_KEY'):
-            return
 
         # Check the value of the "command" field
         if data["command"] == "next":
@@ -244,7 +256,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             return
         
 
-def getServer():
+def infoServer():
     PORT = 18724
 
     # Create a SSL context
@@ -264,12 +276,12 @@ def getServer():
     # Start the server loop
     server.serve_forever()
     
-time.sleep(2)
+time.sleep(0.5)
 
 print("Starting Request Handler Server, ", end="")
 
 # Create a new thread to run the loop
-getserverthread = threading.Thread(target=getServer)
+infoserverthread = threading.Thread(target=infoServer)
 
 # Start the thread
-getserverthread.start()
+infoserverthread.start()

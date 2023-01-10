@@ -1,5 +1,8 @@
 import requests, dotenv, os
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 dotenv.load_dotenv()
 
 url = "https://"+os.getenv('HOST_IP')+":18724/"
@@ -34,3 +37,39 @@ if response.status_code == 200:
     print("Successfully skipped song")
 else:
     print("Failed to skip song. Error: " + str(response.status_code))
+
+# testlen = int(input("Length of GET stress-test: "))
+
+# geterrs = 0
+
+# print("Starting GET request stress-test")
+
+# for i in range(testlen):
+#     response = requests.get(url, verify=False)
+#     if response.status_code == 200:
+#         # Success - the response body will contain the data you requested
+#         data = response.json()
+#     else:
+#         # Error - the request failed
+#         data = None
+
+#     if data['spresponsecode'] != 200 and data['wtresponsecode'] != 200:
+#         print(data)
+#         geterrs+=1
+
+# # posterrs = 0
+
+# # print("Starting POST request stress-test")
+
+# # for i in range(testlen):
+# #     # Send the HTTP POST request
+# #     response = requests.post(url, headers=headers, json=payload, verify=False)
+
+# #     # Check the response status code
+# #     if response.status_code == 200:
+# #         pass
+# #     else:
+# #         print("Failed to skip song. Error: " + str(response.status_code))
+# #         posterrs+=1
+
+# print("GET error count: " + str(geterrs) + "/" + str(testlen))#+"\n"+ "POST error count: " + str(posterrs) + "/" + str(testlen))

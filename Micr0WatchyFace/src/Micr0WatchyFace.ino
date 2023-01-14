@@ -80,7 +80,7 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
             
             // Wifi
 
-            display.drawBitmap(yOffset+10, xOffset-30, WIFI_CONFIGURED ? bm_wifi3 : bm_wifi0, 26, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+            display.drawBitmap(yOffset+10, xOffset-30, WIFI_CONFIGURED ? bm_wifi3 : bm_wifi0, 31, 30, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
             yOffset += 31+10;
 
             // TODO: Alarm?
@@ -95,8 +95,12 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
             }
             uint32_t stepCount = sensor.getCounter();
             display.print(commafy(stepCount) + " Steps");
+            
+            Serial.begin(115200);
 
             // Pull data from server
+            JSONVar responseObject;
+
             if (connectWiFi()) {
                 HTTPClient http;
                 http.setConnectTimeout(3000); // 3 second max timeout
@@ -106,8 +110,9 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
                 if (httpResponseCode == 200) {
                     
                     String payload             = http.getString();
-                    JSONVar responseObject     = JSON.parse(payload);
+                    responseObject     = JSON.parse(payload);
                 }
+                Serial.println(http.getString());
                 http.end();
             }
             // turn off radios
@@ -115,6 +120,19 @@ class MyFirstWatchFace : public Watchy{ //inherit and extend Watchy class
             btStop();
 
             // TODO: Spotify
+
+            display.setCursor(10, xOffset+(10+30));
+            xOffset += 10+30;
+            
+            display.drawBitmap(yOffset+10, xOffset-30, responseObject['isPlaying'] ? bm_pause : bm_play, 30, 30, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+
+            display.setCursor(10+30+10, xOffset);
+
+            String trackName = responseObject["name"];
+            trackName.remove(0,1);
+            trackName.remove(trackName.length()-2,1);
+
+            display.print(trackName);
 
             // TODO: Weather
 

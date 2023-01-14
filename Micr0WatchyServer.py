@@ -83,6 +83,19 @@ except TypeError:
 access_token = oauth.get_access_token(as_dict=False)
 sp = spotipy.Spotify(auth=access_token)
 
+# <--- Info Collection --->
+
+infoDict = {
+    "name":"NA",
+    "artists":"NA",
+    "isPlaying":False,
+    "temperature":0,
+    "status":"NA",
+    "spiresponsecode":503,
+    "sptresponsecode":503,
+    "wtresponsecode":503
+}
+
 # --- Spotify Token Refresh Loop ---
 def tokenloop():
     global sp, access_token
@@ -97,26 +110,21 @@ def tokenloop():
             oauth.refresh_access_token(refresh_token)
             access_token = oauth.get_cached_token()["access_token"]
             sp = spotipy.Spotify(auth=access_token)
+        except requests.exceptions.ReadTimeout:
+            print("Timed Out...")
+            infoDict["sptresponsecode"] = 504
         except spotipy.client.SpotifyException:
             print("SpotifyException, Most likely expired token")
+            infoDict["sptresponsecode"] = 502
         except requests.exceptions.ConnectionError:
             print("ConnectionError")
+            infoDict["sptresponsecode"] = 503
         except Exception as e:
+            infoDict["sptresponsecode"] = 500
             print(e)
+        infoDict["spiresponsecode"] = 200
         print(" Success! Next refresh in "+str(reftime)+" seconds.")
         time.sleep(reftime)
-
-# <--- Info Collection --->
-
-infoDict = {
-    "name":"NA",
-    "artists":"NA",
-    "isPlaying":False,
-    "temperature":0,
-    "status":"NA",
-    "spresponsecode":503,
-    "wtresponsecode":503
-}
 
 # --- Spotify Loop ---
 
@@ -133,22 +141,22 @@ def spotifyloop():
             infoDict["artists"] = str(current_song['item']['artists'][0]['name'])
             for artist in current_song['item']['artists'][1:]:
                 infoDict["artists"]+=", "+str(artist['name'])
-            infoDict["spresponsecode"] = 200
+            infoDict["spiresponsecode"] = 200
         except TypeError:
             infoDict["name"] = tmpname
             infoDict["artists"] = tmpartists
             infoDict["isPlaying"] = tmpisPlaying
         except requests.exceptions.ReadTimeout:
             print("Timed Out...")
-            infoDict["spresponsecode"] = 504
+            infoDict["spiresponsecode"] = 504
         except spotipy.client.SpotifyException:
             print("SpotifyException, Most likely expired token")
-            infoDict["spresponsecode"] = 502
+            infoDict["spiresponsecode"] = 502
         except requests.exceptions.ConnectionError:
             print("ConnectionError")
-            infoDict["spresponsecode"] = 503
+            infoDict["spiresponsecode"] = 503
         except Exception as e:
-            infoDict["spresponsecode"] = 500
+            infoDict["spiresponsecode"] = 500
             print(e)
 
 

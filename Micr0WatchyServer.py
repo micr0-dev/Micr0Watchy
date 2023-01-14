@@ -122,6 +122,7 @@ def tokenloop():
         except Exception as e:
             infoDict["sptresponsecode"] = 500
             print(e)
+        infoDict["spiresponsecode"] = 200
         print(" Success! Next refresh in "+str(reftime)+" seconds.")
         time.sleep(reftime)
 

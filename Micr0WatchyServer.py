@@ -43,7 +43,10 @@ def redirectServer():
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("serving at port", PORT, end="")
         print("... Success!")
-        httpd.serve_forever()
+        time.sleep(60*2)
+        print("Shuting Down Redirect Server... ", end="")
+    print("Success!")
+
 
 print("Starting Redirect Server, ", end="")
 
@@ -282,7 +285,10 @@ def infoServer():
     print("serving at port", PORT, end="")
     print("... Success!")
     # Start the server loop
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except Exception as e:
+        print("An error occurred: ", e)
     
 time.sleep(0.5)
 

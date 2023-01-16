@@ -3,7 +3,6 @@ import spotipy, pyowm
 # Networking
 import requests, json
 from flask import Flask, jsonify, request
-from flask_sslify import SSLify
 
 # Other
 import time, threading, os, dotenv, signal, sys
@@ -245,7 +244,6 @@ weatherthread.start()
 # --- RequestHandler Server ---
 
 app = Flask(__name__)
-sslify = SSLify(app)
 
 @app.route('/', methods=['GET'])
 def handle_get():
@@ -279,7 +277,7 @@ def handle_post():
         print(e)
 
 runningServiceCount+=1
-app.run(host="0.0.0.0", port=18724, ssl_context=('./certificate.pem', './key.pem'))
+app.run(host="0.0.0.0", port=18724)
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown

@@ -318,6 +318,7 @@ def infoServer():
     print("... Success!")
 
     def check_shutdown():
+        global runningServiceCount
         runningServiceCount += 1
         while not isShutingDown:
             time.sleep(1)

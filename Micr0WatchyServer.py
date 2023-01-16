@@ -324,17 +324,20 @@ def infoServer():
         # # Wrap the server in the SSL context
         # server.socket = context.wrap_socket(server.socket, server_side=True)
 
+        print("server = socketserver.TCPServer(("", PORT), RequestHandler)")
         server = socketserver.TCPServer(("", PORT), RequestHandler)
 
-        print("serving at port", PORT, end="")
-        print("... Success!")
-
+        print("thread = threading.Thread(target = server.serve_forever)")
         thread = threading.Thread(target = server.serve_forever)
         thread.daemon = True
         thread.start()
 
+        print("serving at port", PORT, end="")
+        print("... Success!")
+
         while not isShutingDown:
             time.sleep(1)
+            print("not isShutingDown")
         print("Shuting Down Request Handler Server... ", end="")
         server.shutdown()
         print(" Success!")

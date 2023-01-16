@@ -245,7 +245,7 @@ weatherthread.start()
 # --- RequestHandler Server ---
 
 app = Flask(__name__)
-sslify = SSLify(app, permanent=True, age=31536000, cert_path='./certificate.pem', key_path='./key.pem')
+sslify = SSLify(app)
 
 @app.route('/', methods=['GET'])
 def handle_get():

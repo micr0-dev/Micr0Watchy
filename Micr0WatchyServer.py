@@ -2,8 +2,7 @@
 import spotipy, pyowm
 # Networking
 import requests, json
-from flask import Flask, jsonify, request
-
+from flask import Flask, jsonify, request, redirect
 # Other
 import time, threading, os, dotenv, signal, sys
 
@@ -40,36 +39,29 @@ runningServiceCount = 0
 
 # --- Redirect Server for spotify authorization ---
 
-# def redirectServer():
-#     global runningServiceCount
-#     runningServiceCount+=1
-#     PORT = 18723
+reapp = Flask(__name__ + "Redirect Server")
 
-#     Handler = http.server.SimpleHTTPRequestHandler
+@reapp.route("/", methods=["GET"])
+def handle_redirect():
+    if request.method == "GET":
+        return jsonify({}), 200
+
+def stopRedirectServer():
+    global reapp
     
-#     with socketserver.TCPServer(("", PORT), Handler) as httpd:
-#         print("serving at port", PORT, end="")
-#         print("... Success!")
-#         loopCount = 0
-#         while (not isShutingDown) or (loopCount >= 60*2):
-#             time.sleep(1)
-#             loopCount+=1
-#         print("Shuting Down Redirect Server... ", end="")
-#         httpd.server_close()
-#     print("Success!")
-#     runningServiceCount-=1
+    loopCount = 0
+    while (not isShutingDown) and (loopCount < 60*2):
+        time.sleep(1)
+    print("Shuting Down Redirect Server... ", end="")
+    reapp.shutdown()
+    print("Success!")
+    runningServiceCount -= 1
 
-
-# print("Starting Redirect Server, ", end="")
-
-# # Create a new thread to run the loop
-# redserverthread = threading.Thread(target=redirectServer)
-# redserverthread.daemon = True
-
-# # Start the thread
-# redserverthread.start()
-
-# time.sleep(1)
+print("Starting Redirect Server, ", end="")
+runningServiceCount += 1
+reapp.run(port=18723)
+print("Handling redirects on port 18723... ", end="")
+print("Success!")
 
 # Get an access token and refresh token
 scope = "user-read-currently-playing user-read-playback-state user-modify-playback-state"
@@ -288,12 +280,14 @@ def sigterm_handler(_signo, _stack_frame):
     # Exit gracefully
     isShutingDown=True
     loopCount = 0
-    while runningServiceCount > 0 and loopCount <= 10:
+    while runningServiceCount > 0 and loopCount < 10:
         time.sleep(1)
         loopCount += 1
     sys.exit(runningServiceCount)
 
 signal.signal(signal.SIGTERM, sigterm_handler)
+
+stopRedirectServer()
 
 while not isShutingDown:
     time.sleep(1)

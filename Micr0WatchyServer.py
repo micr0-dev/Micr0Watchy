@@ -115,7 +115,7 @@ def tokenloop():
     time.sleep(1)
     runningServiceCount+=1
     loopCount = 0
-    while (not isShutingDown):
+    while not isShutingDown:
         if loopCount >= reftime:
             print("Refreshing Token...", end="")
             try:
@@ -150,7 +150,7 @@ def tokenloop():
 def spotifyloop():
     global runningServiceCount
     runningServiceCount+=1
-    while (not isShutingDown):
+    while not isShutingDown:
         tmpname = str(infoDict["name"])
         tmpartists = str(infoDict["artists"])
         tmpisPlaying = bool(infoDict["isPlaying"])
@@ -195,7 +195,7 @@ def weatherloop():
     global runningServiceCount
     runningServiceCount+=1
     loopCount = 0
-    while (not isShutingDown):
+    while not isShutingDown:
         if loopCount >= 60*10:
             print("Getting Weather in "+city+"...", end="")
             try:
@@ -302,27 +302,39 @@ def infoServer():
     global runningServiceCount
     runningServiceCount+=1
     PORT = 18724
-    while (not isShutingDown):
+    # Create a SSL context
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    
+    # Load the SSL certificate and key
+    context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
+
+    # Create the server and handler objects
+    server = socketserver.TCPServer(("", PORT), RequestHandler)
+
+    # Wrap the server in the SSL context
+    server.socket = context.wrap_socket(server.socket, server_side=True)
+
+    print("serving at port", PORT, end="")
+    print("... Success!")
+
+    def check_shutdown():
+        runningServiceCount += 1
+        while not isShutingDown:
+            time.sleep(1)
+        runningServiceCount -= 1
+
+    shutdown_thread = threading.Thread(target=check_shutdown)
+    shutdown_thread.start()
+
+    while not isShutingDown:
         try:
-            # Create a SSL context
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            
-            # Load the SSL certificate and key
-            context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
-
-            # Create the server and handler objects
-            server = socketserver.TCPServer(("", PORT), RequestHandler)
-
-            # Wrap the server in the SSL context
-            server.socket = context.wrap_socket(server.socket, server_side=True)
-
-            print("serving at port", PORT, end="")
-            print("... Success!")
-
+            server.serve_forever()
         except Exception as e:
             print("An error occurred: ", e)
-        server.server_close()
-    runningServiceCount-=1
+        finally:
+            server.server_close()
+            shutdown_thread.join()
+            runningServiceCount -= 1
     
 time.sleep(0.5)
 
@@ -347,5 +359,5 @@ def sigterm_handler(_signo, _stack_frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-while (not isShutingDown):
+while not isShutingDown:
     pass

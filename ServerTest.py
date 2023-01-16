@@ -5,7 +5,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 dotenv.load_dotenv()
 
-url = "https://"+os.getenv('HOST_IP')+":18724/"
+url = "http://"+os.getenv('HOST_IP')+":18724/"
 # url = "https://localhost:18724/"
 
 response = requests.get(url, verify=False)

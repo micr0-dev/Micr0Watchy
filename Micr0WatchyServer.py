@@ -46,17 +46,6 @@ def handle_redirect():
     if request.method == "GET":
         return jsonify({}), 200
 
-def stopRedirectServer():
-    global reapp
-    
-    loopCount = 0
-    while (not isShutingDown) and (loopCount < 60*2):
-        time.sleep(1)
-    print("Shuting Down Redirect Server... ", end="")
-    reapp.shutdown()
-    print("Success!")
-    runningServiceCount -= 1
-
 print("Starting Redirect Server, ", end="")
 runningServiceCount += 1
 threading.Thread(target=lambda: reapp.run(host="0.0.0.0", port=18723, debug=True, use_reloader=False)).start()
@@ -269,7 +258,11 @@ def handle_post():
         print(e)
 
 runningServiceCount+=1
+
+print("Starting Request Handler Server, ", end="")
 threading.Thread(target=lambda: app.run(host="0.0.0.0", port=18724, debug=True, use_reloader=False)).start()
+print("Handling Requests on port 18724... ", end="")
+print("Success!")
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown
@@ -287,10 +280,16 @@ def sigterm_handler(_signo, _stack_frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-stopRedirectServer()
+print("Shuting Down Redirect Server... ", end="")
+reapp.shutdown()
+print("Success!")
+runningServiceCount -= 1
 
 while not isShutingDown:
     time.sleep(1)
     pass
+print("Shuting Down Request Handler Server... ", end="")
 app.shutdown()
+print("Success!")
+
 runningServiceCount-=1

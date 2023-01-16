@@ -50,6 +50,7 @@ def redirectServer():
         print("... Success!")
         time.sleep(60*2)
         print("Shuting Down Redirect Server... ", end="")
+        httpd.server_close()
     print("Success!")
     runningServiceCount-=1
 
@@ -314,6 +315,7 @@ def infoServer():
 
         except Exception as e:
             print("An error occurred: ", e)
+        server.server_close()
     runningServiceCount-=1
     
 time.sleep(0.5)

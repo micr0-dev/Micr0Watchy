@@ -283,18 +283,18 @@ def sigterm_handler(_signo, _stack_frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-print("Shuting Down Redirect Server... ", end="")
-rdhserver.kill()
-rdhserver.join()
-print("Success!")
+# print("Shuting Down Redirect Server... ", end="")
+# rdhserver.kill()
+# rdhserver.join()
+# print("Success!")
 runningServiceCount -= 1
 
 while not isShutingDown:
     time.sleep(1)
     pass
-print("Shuting Down Request Handler Server... ", end="")
-rqhserver.kill()
-rqhserver.join()
-print("Success!")
+# print("Shuting Down Request Handler Server... ", end="")
+# rqhserver.kill()
+# rqhserver.join()
+# print("Success!")
 
 runningServiceCount-=1

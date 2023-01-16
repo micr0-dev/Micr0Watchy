@@ -350,7 +350,7 @@ infoserverthread.start()
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown
     global runningServiceCount
-    print("Running Service count: " + runningServiceCount)
+    print("Running Service count: " + str(runningServiceCount))
     # Perform cleanup tasks here
     # ...
     # Exit gracefully

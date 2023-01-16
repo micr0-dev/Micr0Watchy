@@ -109,8 +109,7 @@ infoDict = {
 
 # --- Spotify Token Refresh Loop ---
 def tokenloop():
-    global runningServiceCount
-    global sp, access_token
+    global sp, access_token, runningServiceCount, infoDict
     reftime = 0
     time.sleep(1)
     runningServiceCount+=1
@@ -143,12 +142,13 @@ def tokenloop():
         
         loopCount+=1
         time.sleep(1)
+    print("Shuting Down Token Loop... Success!")
     runningServiceCount-=1
 
 # --- Spotify Loop ---
 
 def spotifyloop():
-    global runningServiceCount
+    global runningServiceCount, infoDict
     runningServiceCount+=1
     while not isShutingDown:
         tmpname = str(infoDict["name"])
@@ -187,14 +187,15 @@ def spotifyloop():
         # if (tmpisPlaying != infoDict["isPlaying"]):
         #     print(infoDict["isPlaying"])
         time.sleep(0.5)
+    print("Shuting Down Spotify Loop... Success!")
     runningServiceCount-=1
 
 # --- OpenWeather Fetcher Loop ---
 
 def weatherloop():
-    global runningServiceCount
+    global runningServiceCount, infoDict
     runningServiceCount+=1
-    loopCount = 0
+    loopCount = 60*10
     while not isShutingDown:
         if loopCount >= 60*10:
             print("Getting Weather in "+city+"...", end="")
@@ -216,6 +217,7 @@ def weatherloop():
         
         loopCount+=1
         time.sleep(1)
+    print("Shuting Down Weather Loop... Success!")
     runningServiceCount-=1
         
 # --- Starting threads ---
@@ -322,6 +324,7 @@ def infoServer():
         runningServiceCount += 1
         while not isShutingDown:
             time.sleep(1)
+        print("Shuting Request Handler Server... ", end="")
         runningServiceCount -= 1
 
     shutdown_thread = threading.Thread(target=check_shutdown)
@@ -335,6 +338,7 @@ def infoServer():
         finally:
             server.server_close()
             shutdown_thread.join()
+            print(" Success!")
             runningServiceCount -= 1
     
 time.sleep(0.5)

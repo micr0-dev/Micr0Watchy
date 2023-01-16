@@ -308,17 +308,19 @@ def infoServer():
     global runningServiceCount, server
     runningServiceCount+=1
     PORT = 18724
-    # Create a SSL context
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    # # Create a SSL context
+    # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     
-    # Load the SSL certificate and key
-    context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
+    # # Load the SSL certificate and key
+    # context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
 
-    # Create the server and handler objects
+    # # Create the server and handler objects
+    # server = socketserver.TCPServer(("", PORT), RequestHandler)
+
+    # # Wrap the server in the SSL context
+    # server.socket = context.wrap_socket(server.socket, server_side=True)
+
     server = socketserver.TCPServer(("", PORT), RequestHandler)
-
-    # Wrap the server in the SSL context
-    server.socket = context.wrap_socket(server.socket, server_side=True)
 
     print("serving at port", PORT, end="")
     print("... Success!")
@@ -348,6 +350,7 @@ infoserverthread.start()
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown
     global runningServiceCount
+    print("Running Service count: " + runningServiceCount)
     # Perform cleanup tasks here
     # ...
     # Exit gracefully

@@ -48,7 +48,10 @@ def redirectServer():
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("serving at port", PORT, end="")
         print("... Success!")
-        time.sleep(60*2)
+        loopCount = 0
+        while (not isShutingDown) or (loopCount >= 60*2):
+            time.sleep(1)
+            loopCount+=1
         print("Shuting Down Redirect Server... ", end="")
         httpd.server_close()
     print("Success!")

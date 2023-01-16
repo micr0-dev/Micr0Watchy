@@ -39,6 +39,8 @@ runningServiceCount = 0
 # --- Redirect Server for spotify authorization ---
 
 def redirectServer():
+    global runningServiceCount
+    runningServiceCount+=1
     PORT = 18723
 
     Handler = http.server.SimpleHTTPRequestHandler
@@ -46,7 +48,6 @@ def redirectServer():
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("serving at port", PORT, end="")
         print("... Success!")
-        runningServiceCount+=1
         time.sleep(60*2)
         print("Shuting Down Redirect Server... ", end="")
     print("Success!")
@@ -106,6 +107,7 @@ infoDict = {
 
 # --- Spotify Token Refresh Loop ---
 def tokenloop():
+    global runningServiceCount
     global sp, access_token
     reftime = 0
     time.sleep(1)
@@ -144,6 +146,7 @@ def tokenloop():
 # --- Spotify Loop ---
 
 def spotifyloop():
+    global runningServiceCount
     runningServiceCount+=1
     while (not isShutingDown):
         tmpname = str(infoDict["name"])
@@ -187,6 +190,7 @@ def spotifyloop():
 # --- OpenWeather Fetcher Loop ---
 
 def weatherloop():
+    global runningServiceCount
     runningServiceCount+=1
     loopCount = 0
     while (not isShutingDown):
@@ -288,6 +292,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         
 
 def infoServer():
+    global runningServiceCount
     runningServiceCount+=1
     PORT = 18724
     while (not isShutingDown):
@@ -323,6 +328,7 @@ infoserverthread.start()
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown
+    global runningServiceCount
     # Perform cleanup tasks here
     # ...
     # Exit gracefully

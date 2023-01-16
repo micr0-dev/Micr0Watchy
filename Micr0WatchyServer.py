@@ -302,9 +302,10 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             return
         
+server = None
 
 def infoServer():
-    global runningServiceCount
+    global runningServiceCount, server
     runningServiceCount+=1
     PORT = 18724
     # Create a SSL context

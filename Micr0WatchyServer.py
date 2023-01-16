@@ -39,7 +39,7 @@ runningServiceCount = 0
 
 # --- Redirect Server for spotify authorization ---
 
-reapp = Flask(__name__ + "Redirect Server")
+reapp = Flask("Redirect Server")
 
 @reapp.route("/", methods=["GET"])
 def handle_redirect():
@@ -59,7 +59,7 @@ def stopRedirectServer():
 
 print("Starting Redirect Server, ", end="")
 runningServiceCount += 1
-reapp.run(host="0.0.0.0", port=18723, threaded=True)
+threading.Thread(target=lambda: reapp.run(host="0.0.0.0", port=18723, debug=True, use_reloader=False)).start()
 print("Handling redirects on port 18723... ", end="")
 print("Success!")
 
@@ -269,7 +269,7 @@ def handle_post():
         print(e)
 
 runningServiceCount+=1
-app.run(host="0.0.0.0", port=18724, threaded=True)
+threading.Thread(target=lambda: app.run(host="0.0.0.0", port=18724, debug=True, use_reloader=False)).start()
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown

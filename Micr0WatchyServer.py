@@ -3,7 +3,7 @@ import spotipy, pyowm
 # Networking
 import requests, json
 from flask import Flask, jsonify, request
-from flask_sslify import SSLify, ssl_required
+from flask_sslify import SSLify
 
 # Other
 import time, threading, os, dotenv, signal, sys
@@ -248,7 +248,6 @@ app = Flask(__name__)
 sslify = SSLify(app, permanent=True, age=31536000, cert_path='./certificate.pem', key_path='./key.pem')
 
 @app.route('/', methods=['GET'])
-@ssl_required
 def handle_get():
     try:
         json_data = json.dumps(infoDict)
@@ -257,7 +256,6 @@ def handle_get():
         print(e)
 
 @app.route('/', methods=['POST'])
-@ssl_required
 def handle_post():
     try:
         data = request.get_json()

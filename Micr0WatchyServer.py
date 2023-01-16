@@ -328,6 +328,7 @@ def infoServer():
         while not isShutingDown:
             time.sleep(1)
         print("Shuting Request Handler Server... ", end="")
+        server.server_close()
         runningServiceCount -= 1
 
     shutdown_thread = threading.Thread(target=check_shutdown)
@@ -339,7 +340,6 @@ def infoServer():
         except Exception as e:
             print("An error occurred: ", e)
         finally:
-            server.server_close()
             print(" Success!")
             runningServiceCount -= 1
     

@@ -59,7 +59,7 @@ def stopRedirectServer():
 
 print("Starting Redirect Server, ", end="")
 runningServiceCount += 1
-reapp.run(port=18723)
+reapp.run(host="0.0.0.0", port=18723, threaded=True)
 print("Handling redirects on port 18723... ", end="")
 print("Success!")
 
@@ -269,7 +269,7 @@ def handle_post():
         print(e)
 
 runningServiceCount+=1
-app.run(host="0.0.0.0", port=18724)
+app.run(host="0.0.0.0", port=18724, threaded=True)
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown

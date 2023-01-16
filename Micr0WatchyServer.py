@@ -59,6 +59,7 @@ print("Starting Redirect Server, ", end="")
 
 # Create a new thread to run the loop
 redserverthread = threading.Thread(target=redirectServer)
+redserverthread.daemon = True
 
 # Start the thread
 redserverthread.start()
@@ -221,13 +222,18 @@ def weatherloop():
 
 # Create a new thread to run the loop
 tokenthread = threading.Thread(target=tokenloop)
+tokenthread.daemon = True
 # Start the thread
 tokenthread.start()
 
 sptthread = threading.Thread(target=spotifyloop)
+sptthread.daemon = True
+
 sptthread.start()
 
 weatherthread = threading.Thread(target=weatherloop)
+weatherthread.daemon = True
+
 weatherthread.start()
 
 # --- RequestHandler Server ---
@@ -324,6 +330,7 @@ print("Starting Request Handler Server, ", end="")
 
 # Create a new thread to run the loop
 infoserverthread = threading.Thread(target=infoServer)
+infoserverthread.daemon = True
 
 # Start the thread
 infoserverthread.start()
@@ -339,3 +346,6 @@ def sigterm_handler(_signo, _stack_frame):
     sys.exit(runningServiceCount)
 
 signal.signal(signal.SIGTERM, sigterm_handler)
+
+while (not isShutingDown):
+    pass

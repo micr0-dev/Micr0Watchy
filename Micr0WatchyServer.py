@@ -276,7 +276,7 @@ def sigterm_handler(_signo, _stack_frame):
     # Exit gracefully
     isShutingDown=True
     loopCount = 0
-    while runningServiceCount > 0 and loopCount < 10:
+    while runningServiceCount > 0 and loopCount < 3:
         time.sleep(1)
         loopCount += 1
     sys.exit(runningServiceCount)
@@ -284,7 +284,7 @@ def sigterm_handler(_signo, _stack_frame):
 signal.signal(signal.SIGTERM, sigterm_handler)
 
 print("Shuting Down Redirect Server... ", end="")
-rdhserver.terminate()
+rdhserver.kill()
 rdhserver.join()
 print("Success!")
 runningServiceCount -= 1
@@ -293,7 +293,7 @@ while not isShutingDown:
     time.sleep(1)
     pass
 print("Shuting Down Request Handler Server... ", end="")
-rqhserver.terminate()
+rqhserver.kill()
 rqhserver.join()
 print("Success!")
 

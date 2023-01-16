@@ -38,38 +38,36 @@ runningServiceCount = 0
 
 # --- Redirect Server for spotify authorization ---
 
-def redirectServer():
-    global runningServiceCount
-    runningServiceCount+=1
-    PORT = 18723
+# def redirectServer():
+#     global runningServiceCount
+#     runningServiceCount+=1
+#     PORT = 18723
 
-    Handler = http.server.SimpleHTTPRequestHandler
+#     Handler = http.server.SimpleHTTPRequestHandler
     
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print("serving at port", PORT, end="")
-        print("... Success!")
-        loopCount = 0
-        while (not isShutingDown) or (loopCount >= 60*2):
-            time.sleep(1)
-            loopCount+=1
-        print("Shuting Down Redirect Server... ", end="")
-        httpd.server_close()
-    print("Success!")
-    runningServiceCount-=1
+#     with socketserver.TCPServer(("", PORT), Handler) as httpd:
+#         print("serving at port", PORT, end="")
+#         print("... Success!")
+#         loopCount = 0
+#         while (not isShutingDown) or (loopCount >= 60*2):
+#             time.sleep(1)
+#             loopCount+=1
+#         print("Shuting Down Redirect Server... ", end="")
+#         httpd.server_close()
+#     print("Success!")
+#     runningServiceCount-=1
 
 
-print("Starting Redirect Server, ", end="")
+# print("Starting Redirect Server, ", end="")
 
-# Create a new thread to run the loop
-redserverthread = threading.Thread(target=redirectServer)
-redserverthread.daemon = True
+# # Create a new thread to run the loop
+# redserverthread = threading.Thread(target=redirectServer)
+# redserverthread.daemon = True
 
-# Start the thread
-redserverthread.start()
+# # Start the thread
+# redserverthread.start()
 
-time.sleep(1)
-
-
+# time.sleep(1)
 
 # Get an access token and refresh token
 scope = "user-read-currently-playing user-read-playback-state user-modify-playback-state"
@@ -221,7 +219,7 @@ def weatherloop():
         loopCount+=1
         time.sleep(1)
     print("Shuting Down Weather Loop... Success!")
-    runningServiceCount-=1
+    
         
 # --- Starting threads ---
 

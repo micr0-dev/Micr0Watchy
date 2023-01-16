@@ -323,26 +323,16 @@ def infoServer():
     print("serving at port", PORT, end="")
     print("... Success!")
 
-    def check_shutdown():
-        global runningServiceCount, server
-        runningServiceCount += 1
-        while not isShutingDown:
-            time.sleep(1)
-        print("Shuting Request Handler Server... ", end="")
-        server.server_close()
-        runningServiceCount -= 1
-
-    shutdown_thread = threading.Thread(target=check_shutdown)
-    shutdown_thread.start()
+    thread = threading.Thread(target = server.serve_forever)
+    thread.daemon = True
+    thread.start()
 
     while not isShutingDown:
-        try:
-            server.serve_forever()
-        except Exception as e:
-            print("An error occurred: ", e)
-        finally:
-            print(" Success!")
-            runningServiceCount -= 1
+        time.sleep(1)
+    print("Shuting Down Request Handler Server... ", end="")
+    server.shutdown()
+    print(" Success!")
+    runningServiceCount -= 1
     
 time.sleep(0.5)
 
@@ -362,7 +352,10 @@ def sigterm_handler(_signo, _stack_frame):
     # ...
     # Exit gracefully
     isShutingDown=True
-    time.sleep(20)
+    loopCount = 0
+    while runningServiceCount > 0 or loopCount >= 10:
+        time.sleep(1)
+        loopCount += 1
     sys.exit(runningServiceCount)
 
 signal.signal(signal.SIGTERM, sigterm_handler)

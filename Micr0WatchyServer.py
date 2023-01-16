@@ -373,4 +373,5 @@ def sigterm_handler(_signo, _stack_frame):
 signal.signal(signal.SIGTERM, sigterm_handler)
 
 while not isShutingDown:
+    time.sleep(1)
     pass

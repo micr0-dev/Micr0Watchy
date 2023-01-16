@@ -243,98 +243,104 @@ weatherthread.start()
 
 # --- RequestHandler Server ---
 
-class RequestHandler(http.server.BaseHTTPRequestHandler):
+class RequestHandler(socketserver.BaseHTTPRequestHandler):
     def do_GET(self):
-        # Set the response code to 200 OK
-        self.send_response(200)
-        
-        # Set the content type to application/json
-        self.send_header('Content-type', 'application/json')
-        
-        # Set the Content-Security-Policy header to allow loading resources over HTTPS
-        self.send_header('Content-Security-Policy', "default-src https:")
-        
-        # End the headers
-        self.end_headers()
-        
-        # Convert the dictionary to a JSON string
-        json_data = json.dumps(infoDict)
-        
-        # Write the JSON string to the response body
-        self.wfile.write(bytes(json_data, 'utf-8'))
-
-    def do_POST(self):
-        # Read the request body
-        content_length = int(self.headers['Content-Length'])
-        body = self.rfile.read(content_length)
-
-        # Convert the request body to a JSON object
-        data = json.loads(body)
-
-        if data["key"] != os.getenv('HANDLER_KEY'):
-            self.send_response(403)  # Forbidden
+        try:
+            # Set the response code to 200 OK
+            self.send_response(200)
+            
+            # Set the content type to application/json
             self.send_header('Content-type', 'application/json')
+            
+            # Set the Content-Security-Policy header to allow loading resources over HTTPS
             self.send_header('Content-Security-Policy', "default-src https:")
+            
+            # End the headers
             self.end_headers()
-            self.wfile.write(bytes('{"error": "Access denied"}', 'utf-8'))
-            return
+            
+            # Convert the dictionary to a JSON string
+            json_data = json.dumps(infoDict)
+            
+            # Write the JSON string to the response body
+            self.wfile.write(bytes(json_data, 'utf-8'))
+        except Exception as e:
+                print(e)
+    def do_POST(self):
+        try:
+            # Read the request body
+            content_length = int(self.headers['Content-Length'])
+            body = self.rfile.read(content_length)
 
-        self.send_response(200)
+            # Convert the request body to a JSON object
+            data = json.loads(body)
 
-        self.send_header('Content-type', 'application/json')
-        
-        # Set the Content-Security-Policy header to allow loading resources over HTTPS
-        self.send_header('Content-Security-Policy', "default-src https:")
-        
-        # End the headers
-        self.end_headers()
+            if data["key"] != os.getenv('HANDLER_KEY'):
+                self.send_response(403)  # Forbidden
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Content-Security-Policy', "default-src https:")
+                self.end_headers()
+                self.wfile.write(bytes('{"error": "Access denied"}', 'utf-8'))
+                return
 
-        # Check the value of the "command" field
-        if data["command"] == "next":
-            sp.next_track()
-        elif data["command"] == "prev":
-            sp.previous_track()
-        elif data["command"] == "pause":
-            if infoDict["isPlaying"]:
-                sp.pause_playback()
+            self.send_response(200)
+
+            self.send_header('Content-type', 'application/json')
+            
+            # Set the Content-Security-Policy header to allow loading resources over HTTPS
+            self.send_header('Content-Security-Policy', "default-src https:")
+            
+            # End the headers
+            self.end_headers()
+
+            # Check the value of the "command" field
+            if data["command"] == "next":
+                sp.next_track()
+            elif data["command"] == "prev":
+                sp.previous_track()
+            elif data["command"] == "pause":
+                if infoDict["isPlaying"]:
+                    sp.pause_playback()
+                else:
+                    sp.start_playback()
             else:
-                sp.start_playback()
-        else:
-            return
-        
-server = None
+                return
+        except Exception as e:
+                print(e)
 
 def infoServer():
-    global runningServiceCount, server
-    runningServiceCount+=1
-    PORT = 18724
-    # # Create a SSL context
-    # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    
-    # # Load the SSL certificate and key
-    # context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
+    try:
+        global runningServiceCount, server
+        runningServiceCount+=1
+        PORT = 18724
+        # # Create a SSL context
+        # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        
+        # # Load the SSL certificate and key
+        # context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
 
-    # # Create the server and handler objects
-    # server = socketserver.TCPServer(("", PORT), RequestHandler)
+        # # Create the server and handler objects
+        # server = socketserver.TCPServer(("", PORT), RequestHandler)
 
-    # # Wrap the server in the SSL context
-    # server.socket = context.wrap_socket(server.socket, server_side=True)
+        # # Wrap the server in the SSL context
+        # server.socket = context.wrap_socket(server.socket, server_side=True)
 
-    server = socketserver.TCPServer(("", PORT), RequestHandler)
+        server = socketserver.TCPServer(("", PORT), RequestHandler)
 
-    print("serving at port", PORT, end="")
-    print("... Success!")
+        print("serving at port", PORT, end="")
+        print("... Success!")
 
-    thread = threading.Thread(target = server.serve_forever)
-    thread.daemon = True
-    thread.start()
+        thread = threading.Thread(target = server.serve_forever)
+        thread.daemon = True
+        thread.start()
 
-    while not isShutingDown:
-        time.sleep(1)
-    print("Shuting Down Request Handler Server... ", end="")
-    server.shutdown()
-    print(" Success!")
-    runningServiceCount -= 1
+        while not isShutingDown:
+            time.sleep(1)
+        print("Shuting Down Request Handler Server... ", end="")
+        server.shutdown()
+        print(" Success!")
+        runningServiceCount -= 1
+    except Exception as e:
+                print(e)
     
 time.sleep(0.5)
 
@@ -356,7 +362,7 @@ def sigterm_handler(_signo, _stack_frame):
     # Exit gracefully
     isShutingDown=True
     loopCount = 0
-    while runningServiceCount > 0 or loopCount >= 10:
+    while runningServiceCount > 0 and loopCount <= 10:
         time.sleep(1)
         loopCount += 1
     sys.exit(runningServiceCount)

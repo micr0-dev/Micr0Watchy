@@ -17,6 +17,8 @@ else:
   # Error - the request failed
   data = None
 
+response.close()
+
 print(data)
 
 headers = {
@@ -37,6 +39,8 @@ if response.status_code == 200:
     print("Successfully skipped song")
 else:
     print("Failed to skip song. Error: " + str(response.status_code))
+
+response.close()
 
 # testlen = int(input("Length of GET stress-test: "))
 

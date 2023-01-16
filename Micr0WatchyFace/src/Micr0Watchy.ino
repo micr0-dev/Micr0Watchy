@@ -209,7 +209,7 @@ void Micr0Watchy::drawWatchFace(){
     if (connectWiFi()) {
         HTTPClient http;
         http.setConnectTimeout(3000); // 3 second max timeout
-        String serverUrl = "http://"+ String(BACKEND_IP) +":18724/";
+        String serverUrl = "https://"+ String(BACKEND_IP) +":18724/";
         http.begin(serverUrl.c_str());
         int httpResponseCode = http.GET();
         if (httpResponseCode == 200) {
@@ -261,7 +261,7 @@ void Micr0Watchy::drawWatchFace(){
 
     yOffset += 30;
 
-    // TODO: Weather
+    // Weather
 
     display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
 

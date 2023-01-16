@@ -243,7 +243,7 @@ weatherthread.start()
 
 # --- RequestHandler Server ---
 
-class RequestHandler(socketserver.BaseHTTPRequestHandler):
+class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             # Set the response code to 200 OK

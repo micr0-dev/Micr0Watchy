@@ -337,7 +337,6 @@ def infoServer():
             print("An error occurred: ", e)
         finally:
             server.server_close()
-            shutdown_thread.join()
             print(" Success!")
             runningServiceCount -= 1
     
@@ -359,7 +358,7 @@ def sigterm_handler(_signo, _stack_frame):
     # ...
     # Exit gracefully
     isShutingDown=True
-    time.sleep(3)
+    time.sleep(20)
     sys.exit(runningServiceCount)
 
 signal.signal(signal.SIGTERM, sigterm_handler)

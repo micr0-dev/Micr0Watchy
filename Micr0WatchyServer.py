@@ -1,7 +1,9 @@
 # APIs
 import spotipy, pyowm
 # Networking
-import http.server, socketserver, requests, json, ssl
+import requests, json
+from flask import Flask, jsonify, request
+
 # Other
 import time, threading, os, dotenv, signal, sys
 
@@ -241,118 +243,41 @@ weatherthread.start()
 
 # --- RequestHandler Server ---
 
-class RequestHandler(http.server.BaseHTTPRequestHandler):
-    def do_GET(self):
-        try:
-            # Set the response code to 200 OK
-            self.send_response(200)
-            
-            # Set the content type to application/json
-            self.send_header('Content-type', 'application/json')
-            
-            # Set the Content-Security-Policy header to allow loading resources over HTTPS
-            self.send_header('Content-Security-Policy', "default-src https:")
-            
-            # End the headers
-            self.end_headers()
-            
-            # Convert the dictionary to a JSON string
-            json_data = json.dumps(infoDict)
-            
-            # Write the JSON string to the response body
-            self.wfile.write(bytes(json_data, 'utf-8'))
-        except Exception as e:
-                print(e)
-    def do_POST(self):
-        try:
-            # Read the request body
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length)
+app = Flask(__name__)
 
-            # Convert the request body to a JSON object
-            data = json.loads(body)
-
-            if data["key"] != os.getenv('HANDLER_KEY'):
-                self.send_response(403)  # Forbidden
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Content-Security-Policy', "default-src https:")
-                self.end_headers()
-                self.wfile.write(bytes('{"error": "Access denied"}', 'utf-8'))
-                return
-
-            self.send_response(200)
-
-            self.send_header('Content-type', 'application/json')
-            
-            # Set the Content-Security-Policy header to allow loading resources over HTTPS
-            self.send_header('Content-Security-Policy', "default-src https:")
-            
-            # End the headers
-            self.end_headers()
-
-            # Check the value of the "command" field
-            if data["command"] == "next":
-                sp.next_track()
-            elif data["command"] == "prev":
-                sp.previous_track()
-            elif data["command"] == "pause":
-                if infoDict["isPlaying"]:
-                    sp.pause_playback()
-                else:
-                    sp.start_playback()
-            else:
-                return
-        except Exception as e:
-                print(e)
-
-def infoServer():
+@app.route('/', methods=['GET'])
+def handle_get():
     try:
-        global runningServiceCount, server
-        runningServiceCount+=1
-        PORT = 18724
-        # # Create a SSL context
-        # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        
-        # # Load the SSL certificate and key
-        # context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
-
-        # # Create the server and handler objects
-        # server = socketserver.TCPServer(("", PORT), RequestHandler)
-
-        # # Wrap the server in the SSL context
-        # server.socket = context.wrap_socket(server.socket, server_side=True)
-
-        print("server = socketserver.TCPServer(("", PORT), RequestHandler)")
-        server = socketserver.TCPServer(("", PORT), RequestHandler)
-
-        print("thread = threading.Thread(target = server.serve_forever)")
-        thread = threading.Thread(target = server.serve_forever)
-        thread.daemon = True
-        thread.start()
-
-        print("serving at port", PORT, end="")
-        print("... Success!")
-
-        while not isShutingDown:
-            time.sleep(1)
-            print("not isShutingDown")
-        print("Shuting Down Request Handler Server... ", end="")
-        server.shutdown()
-        print(" Success!")
-        runningServiceCount -= 1
+        json_data = json.dumps(infoDict)
+        return jsonify(json_data)
     except Exception as e:
-                print(e)
-    
-time.sleep(0.5)
+        print(e)
 
-print("Starting Request Handler Server, ", end="")
+@app.route('/', methods=['POST'])
+def handle_post():
+    try:
+        data = request.get_json()
+        if data["key"] != os.getenv('HANDLER_KEY'):
+            return jsonify({"error": "Access denied"}), 403
 
-# Create a new thread to run the loop
-infoserverthread = threading.Thread(target=infoServer)
-infoserverthread.daemon = True
+        # Check the value of the "command" field
+        if data["command"] == "next":
+            sp.next_track()
+        elif data["command"] == "prev":
+            sp.previous_track()
+        elif data["command"] == "pause":
+            if infoDict["isPlaying"]:
+                sp.pause_playback()
+            else:
+                sp.start_playback()
+        else:
+            return
+        return jsonify({}), 200
+    except Exception as e:
+        print(e)
 
-# Start the thread
-infoserverthread.start()
+runningServiceCount+=1
+app.run(port=18724)
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown
@@ -373,3 +298,5 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 while not isShutingDown:
     time.sleep(1)
     pass
+app.shutdown()
+runningServiceCount-=1

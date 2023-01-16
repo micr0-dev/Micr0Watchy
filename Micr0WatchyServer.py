@@ -322,7 +322,7 @@ def infoServer():
     print("serving at port", PORT, end="")
     print("... Success!")
 
-    def check_shutdown():
+    def check_shutdown(server):
         global runningServiceCount
         runningServiceCount += 1
         while not isShutingDown:
@@ -331,7 +331,7 @@ def infoServer():
         server.server_close()
         runningServiceCount -= 1
 
-    shutdown_thread = threading.Thread(target=check_shutdown)
+    shutdown_thread = threading.Thread(target=check_shutdown, args=(server))
     shutdown_thread.start()
 
     while not isShutingDown:

@@ -5,10 +5,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 dotenv.load_dotenv()
 
-url = "http://"+os.getenv('HOST_IP')+":18724/"
+url = "https://"+os.getenv('HOST_IP')+":18724/"
 # url = "https://localhost:18724/"
 
-response = requests.get(url)
+response = requests.get(url, verify=False)
 
 if response.status_code == 200:
   # Success - the response body will contain the data you requested
@@ -32,7 +32,7 @@ payload = {
 }
 
 # Send the HTTP POST request
-response = requests.post(url, headers=headers, json=payload)
+response = requests.post(url, headers=headers, json=payload, verify=False)
 
 # Check the response status code
 if response.status_code == 200:

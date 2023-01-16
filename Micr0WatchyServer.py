@@ -279,7 +279,7 @@ def handle_post():
         print(e)
 
 runningServiceCount+=1
-app.run(host="0.0.0.0",port=18724)
+app.run(host="0.0.0.0", port=18724, ssl_context=('./certificate.pem', './key.pem'))
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown

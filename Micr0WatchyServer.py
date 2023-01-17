@@ -232,7 +232,7 @@ app = Flask(__name__)
 def handle_get():
     try:
         json_data = json.dumps(infoDict)
-        return jsonify(json_data)
+        return jsonify(json_data, ensure_ascii=False)
     except Exception as e:
         print(e)
 

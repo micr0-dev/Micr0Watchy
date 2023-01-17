@@ -231,10 +231,10 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def handle_get():
     try:
-        json_data = json.dumps(infoDict, ensure_ascii=False)
-        return jsonify(json_data)
+        return jsonify(infoDict), 200
     except Exception as e:
         print(e)
+        return jsonify({}), 500
 
 @app.route('/', methods=['POST'])
 def handle_post():

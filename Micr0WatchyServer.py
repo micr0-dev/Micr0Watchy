@@ -231,8 +231,8 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def handle_get():
     try:
-        json_data = json.dumps(infoDict)
-        return jsonify(json_data, ensure_ascii=False)
+        json_data = json.dumps(infoDict, ensure_ascii=False)
+        return jsonify(json_data)
     except Exception as e:
         print(e)
 

@@ -119,6 +119,8 @@ void Micr0Watchy::showWatchFace(bool partialRefresh) {
 void Micr0Watchy::drawWatchFace(){ 
     int yOffset = 10;
 
+    // Serial.begin(115200);
+
     display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
     display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     display.setFont(&bit_pusab12pt7b);
@@ -213,10 +215,9 @@ void Micr0Watchy::drawWatchFace(){
         http.begin(serverUrl.c_str());
         int httpResponseCode = http.GET();
         if (httpResponseCode == 200) {
-            
             String payload     = http.getString();
+            //Serial.println(payload);
             responseObject     = JSON.parse(payload);
-            
         }
         http.end();
         //syncNTP();
@@ -261,7 +262,7 @@ void Micr0Watchy::drawWatchFace(){
 
     yOffset += 30;
 
-    // TODO: Weather
+    // Weather
 
     display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
 
@@ -449,7 +450,7 @@ String Micr0Watchy::commafy(uint32_t num) {
     String result = "";
     int len = numStr.length();
     int insertCount = (len - 1) / 3;
-    for (int i = 0; i < len; i++) {
+    for (int i = len-1; i <= 0; i++) {
         if (i > 0 && (len - i) % 3 == insertCount) {
             result += ",";
         }

@@ -1,7 +1,8 @@
 # APIs
 import spotipy, pyowm
 # Networking
-import http.server, socketserver, requests, json, ssl
+import requests, json
+from flask import Flask, jsonify, request, redirect
 # Other
 import time, threading, os, dotenv, signal, sys
 
@@ -38,38 +39,20 @@ runningServiceCount = 0
 
 # --- Redirect Server for spotify authorization ---
 
-def redirectServer():
-    global runningServiceCount
-    runningServiceCount+=1
-    PORT = 18723
+reapp = Flask("Redirect Server")
 
-    Handler = http.server.SimpleHTTPRequestHandler
-    
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print("serving at port", PORT, end="")
-        print("... Success!")
-        loopCount = 0
-        while (not isShutingDown) or (loopCount >= 60*2):
-            time.sleep(1)
-            loopCount+=1
-        print("Shuting Down Redirect Server... ", end="")
-        httpd.server_close()
-    print("Success!")
-    runningServiceCount-=1
+@reapp.route("/", methods=["GET"])
+def handle_redirect():
+    if request.method == "GET":
+        return jsonify({}), 200
 
+rdhserver = threading.Thread(target=lambda: reapp.run(host="0.0.0.0", port=18723, debug=True, use_reloader=False))
 
 print("Starting Redirect Server, ", end="")
-
-# Create a new thread to run the loop
-redserverthread = threading.Thread(target=redirectServer)
-redserverthread.daemon = True
-
-# Start the thread
-redserverthread.start()
-
-time.sleep(1)
-
-
+runningServiceCount += 1
+rdhserver.start()
+print("Handling redirects on port 18723... ", end="")
+print("Success!")
 
 # Get an access token and refresh token
 scope = "user-read-currently-playing user-read-playback-state user-modify-playback-state"
@@ -221,7 +204,7 @@ def weatherloop():
         loopCount+=1
         time.sleep(1)
     print("Shuting Down Weather Loop... Success!")
-    runningServiceCount-=1
+    
         
 # --- Starting threads ---
 
@@ -243,115 +226,46 @@ weatherthread.start()
 
 # --- RequestHandler Server ---
 
-class RequestHandler(http.server.BaseHTTPRequestHandler):
-    def do_GET(self):
-        try:
-            # Set the response code to 200 OK
-            self.send_response(200)
-            
-            # Set the content type to application/json
-            self.send_header('Content-type', 'application/json')
-            
-            # Set the Content-Security-Policy header to allow loading resources over HTTPS
-            self.send_header('Content-Security-Policy', "default-src https:")
-            
-            # End the headers
-            self.end_headers()
-            
-            # Convert the dictionary to a JSON string
-            json_data = json.dumps(infoDict)
-            
-            # Write the JSON string to the response body
-            self.wfile.write(bytes(json_data, 'utf-8'))
-        except Exception as e:
-                print(e)
-    def do_POST(self):
-        try:
-            # Read the request body
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length)
+app = Flask(__name__)
 
-            # Convert the request body to a JSON object
-            data = json.loads(body)
-
-            if data["key"] != os.getenv('HANDLER_KEY'):
-                self.send_response(403)  # Forbidden
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Content-Security-Policy', "default-src https:")
-                self.end_headers()
-                self.wfile.write(bytes('{"error": "Access denied"}', 'utf-8'))
-                return
-
-            self.send_response(200)
-
-            self.send_header('Content-type', 'application/json')
-            
-            # Set the Content-Security-Policy header to allow loading resources over HTTPS
-            self.send_header('Content-Security-Policy', "default-src https:")
-            
-            # End the headers
-            self.end_headers()
-
-            # Check the value of the "command" field
-            if data["command"] == "next":
-                sp.next_track()
-            elif data["command"] == "prev":
-                sp.previous_track()
-            elif data["command"] == "pause":
-                if infoDict["isPlaying"]:
-                    sp.pause_playback()
-                else:
-                    sp.start_playback()
-            else:
-                return
-        except Exception as e:
-                print(e)
-
-def infoServer():
+@app.route('/', methods=['GET'])
+def handle_get():
     try:
-        global runningServiceCount, server
-        runningServiceCount+=1
-        PORT = 18724
-        # # Create a SSL context
-        # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        
-        # # Load the SSL certificate and key
-        # context.load_cert_chain(certfile=path+'certificate.pem', keyfile=path+'key.pem', password=keyPass)
-
-        # # Create the server and handler objects
-        # server = socketserver.TCPServer(("", PORT), RequestHandler)
-
-        # # Wrap the server in the SSL context
-        # server.socket = context.wrap_socket(server.socket, server_side=True)
-
-        server = socketserver.TCPServer(("", PORT), RequestHandler)
-
-        print("serving at port", PORT, end="")
-        print("... Success!")
-
-        thread = threading.Thread(target = server.serve_forever)
-        thread.daemon = True
-        thread.start()
-
-        while not isShutingDown:
-            time.sleep(1)
-        print("Shuting Down Request Handler Server... ", end="")
-        server.shutdown()
-        print(" Success!")
-        runningServiceCount -= 1
+        return jsonify(infoDict), 200
     except Exception as e:
-                print(e)
-    
-time.sleep(0.5)
+        print(e)
+        return jsonify({}), 500
 
+@app.route('/', methods=['POST'])
+def handle_post():
+    try:
+        data = request.get_json()
+        if data["key"] != os.getenv('HANDLER_KEY'):
+            return jsonify({"error": "Access denied"}), 403
+
+        # Check the value of the "command" field
+        if data["command"] == "next":
+            sp.next_track()
+        elif data["command"] == "prev":
+            sp.previous_track()
+        elif data["command"] == "pause":
+            if infoDict["isPlaying"]:
+                sp.pause_playback()
+            else:
+                sp.start_playback()
+        else:
+            return
+        return jsonify({}), 200
+    except Exception as e:
+        print(e)
+
+runningServiceCount+=1
+
+rqhserver = threading.Thread(target=lambda: app.run(host="0.0.0.0", port=18724, debug=True, use_reloader=False))
 print("Starting Request Handler Server, ", end="")
-
-# Create a new thread to run the loop
-infoserverthread = threading.Thread(target=infoServer)
-infoserverthread.daemon = True
-
-# Start the thread
-infoserverthread.start()
+rqhserver.start()
+print("Handling Requests on port 18724... ", end="")
+print("Success!")
 
 def sigterm_handler(_signo, _stack_frame):
     global isShutingDown
@@ -362,12 +276,22 @@ def sigterm_handler(_signo, _stack_frame):
     # Exit gracefully
     isShutingDown=True
     loopCount = 0
-    while runningServiceCount > 0 and loopCount <= 10:
+    while runningServiceCount > 2 and loopCount < 3:
         time.sleep(1)
         loopCount += 1
     sys.exit(runningServiceCount)
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
+# print("Shuting Down Redirect Server... ", end="")
+# rdhserver.kill()
+# rdhserver.join()
+# print("Success!")
+
 while not isShutingDown:
+    time.sleep(1)
     pass
+# print("Shuting Down Request Handler Server... ", end="")
+# rqhserver.kill()
+# rqhserver.join()
+# print("Success!")

@@ -119,7 +119,7 @@ void Micr0Watchy::showWatchFace(bool partialRefresh) {
 void Micr0Watchy::drawWatchFace(){ 
     int yOffset = 10;
 
-    Serial.begin(115200);
+    // Serial.begin(115200);
 
     display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
     display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
@@ -216,7 +216,7 @@ void Micr0Watchy::drawWatchFace(){
         int httpResponseCode = http.GET();
         if (httpResponseCode == 200) {
             String payload     = http.getString();
-            Serial.println(payload);
+            //Serial.println(payload);
             responseObject     = JSON.parse(payload);
         }
         http.end();

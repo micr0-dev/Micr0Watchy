@@ -36,7 +36,7 @@ This image is an original plan/sketch of the idea behind Micr0Watchy. The main i
 ## Technical Details
 Micr0Watchy is a back-end, front-end system for watchy that uses several technologies to achieve its functionality.
 
-On the back-end side, Micr0Watchy uses a Python-based server that utilizes the socketserver library to handle HTTP requests from the watch. The server uses the Spotify Web API to control music playback and view the currently playing song. It also uses the OpenWeather API to get the current weather and forecast. The server also uses the JSON library to convert the data received from the APIs into a JSON format that can be easily parsed by the watch.
+On the back-end side, Micr0Watchy uses a Python-based server that utilizes Flask to handle HTTP requests from the watch. The server uses the Spotify Web API to control music playback and view the currently playing song. It also uses the OpenWeather API to get the current weather and forecast. The server also uses the JSON library to convert the data received from the APIs into a JSON format that can be easily parsed by the watch.
 
 On the front-end side, Micr0Watchy uses an ESP32 chip as the main processor for the watch. The watch communicates with the back-end server using the HTTPClient library to make GET and POST requests. The watch also uses the ArduinoJson library to parse the JSON data received from the server.
 

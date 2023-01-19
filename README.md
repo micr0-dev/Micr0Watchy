@@ -12,6 +12,7 @@ Micr0Watchy is a replacement for the ![Watchy by SQFMI](https://github.com/sqfmi
 ## Features
 - Integration with Spotify to control music playback and view the currently playing song
 - Integration with OpenWeather to display current weather and forecast
+- Stable back-end server for communicating with APIs
 
 ## Future Development
 Micr0Watchy is a work in progress, and there are many more features and improvements that we plan to add in the future. Some of the planned features include:
@@ -21,7 +22,6 @@ Micr0Watchy is a work in progress, and there are many more features and improvem
 - Customizable watch faces
 - WIFI OTA updates
 - Additional APIs for more features
-- Improved server performance and stability
 
 We are constantly working to improve Micr0Watchy and make it the best it can be. We appreciate any feedback and suggestions from the community, so please feel free to reach out to us with your ideas.
 

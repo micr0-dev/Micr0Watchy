@@ -1,4 +1,4 @@
-## Work in progress! The server is still very buggy!
+## Work in progress!
 
 ![](/Concept/Micr0Watchy.png)
 ![](/Concept/Watchy.png)
